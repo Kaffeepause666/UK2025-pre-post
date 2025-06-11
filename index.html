@@ -87,6 +87,62 @@
   </div>
 
   <script>
+    loadCSV('data.csv').then(data => {
+  const locations = [...new Set(data.map(entry => entry.location))];
+  locations.forEach(location => {
+    const option = document.createElement('option');
+    option.value = location;
+    option.textContent = location;
+    locationSelect.appendChild(option);
+  });
+
+  const today = new Date().toISOString().split('T')[0]; // Format: yyyy-mm-dd
+  const todayEntry = data.find(entry => entry.date === today);
+
+  if (todayEntry) {
+    locationSelect.value = todayEntry.location;
+    triggerLocationDisplay(todayEntry.location, data);
+  }
+
+  locationSelect.addEventListener('change', () => {
+    const selectedLocation = locationSelect.value;
+    triggerLocationDisplay(selectedLocation, data);
+  });
+
+}).catch(err => {
+  resultsDiv.innerHTML = '<p style="color:red;">Fehler beim Laden der CSV-Daten.</p>';
+  console.error(err);
+});
+
+// Funktion zur Anzeige von Einträgen
+function triggerLocationDisplay(locationName, allData) {
+  resultsDiv.innerHTML = '';
+  const filtered = allData.filter(entry => entry.location === locationName);
+
+  filtered.forEach(entry => {
+    const container = document.createElement('div');
+    container.className = 'entry';
+
+    const title = document.createElement('h3');
+    title.textContent = entry.name;
+    container.appendChild(title);
+
+    const btn1 = createButton('Webseite', entry.url);
+    const btn2 = createButton('Park Map', entry.mpurl);
+    const btn3 = createButton('Coaster Count', entry.ccurl);
+    const btn4 = createButton('RCDB', entry.rcdburl);
+    const btn5 = createButton('Wettervorhersage', entry.w3url);
+    const btn6 = createButton('Niederschlagsradar', entry.weurl);
+    const btn7 = createButton('Heutiges Hotel', entry.hourl);
+
+    addButtonRow(container, [btn1, btn2]);
+    addButtonRow(container, [btn3, btn4]);
+    addButtonRow(container, [btn5, btn6]);
+    if (btn7) container.appendChild(btn7);
+
+    resultsDiv.appendChild(container);
+  });
+}
     async function loadCSV(url) {
       const response = await fetch(url);
       const text = await response.text();
