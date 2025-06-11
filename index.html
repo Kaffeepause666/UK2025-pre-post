@@ -137,16 +137,18 @@
 
         const btn1 = createButton('Webseite', entry.url);
         const btn2 = createButton('Park Map', entry.mpurl);
+        const btnWartezeit = createButton('Wartezeit', entry.wturl);
         const btn3 = createButton('Coaster Count', entry.ccurl);
         const btn4 = createButton('RCDB', entry.rcdburl);
         const btn5 = createButton('Wettervorhersage', entry.w3url);
         const btn6 = createButton('Niederschlagsradar', entry.weurl);
         const btn7 = createButton('Heutiges Hotel', entry.hourl);
 
-        addButtonRow(container, [btn1, btn2]); // Zeile 1
-        addButtonRow(container, [btn3, btn4]); // Zeile 2
-        addButtonRow(container, [btn5, btn6]); // Zeile 3
-        if (btn7) container.appendChild(btn7); // Zeile 4
+        addButtonRow(container, [btn1, btn2]);         // Zeile 1
+        if (btnWartezeit) addButtonRow(container, [btnWartezeit]); // Neue Zeile: Wartezeit
+        addButtonRow(container, [btn3, btn4]);         // Zeile 2
+        addButtonRow(container, [btn5, btn6]);         // Zeile 3
+        if (btn7) container.appendChild(btn7);         // Zeile 4
 
         resultsDiv.appendChild(container);
       });
