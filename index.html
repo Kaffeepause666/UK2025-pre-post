@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Location Links</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      margin: 0;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+
+    .entry {
+      margin-bottom: 30px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+
+    .entry h3 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin: 5px 0;
+    }
+
+    .button-row button {
+      flex: 1;
+    }
+
+    .entry button {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+    }
+
+    #tourGuideContainer {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    #tourGuideContainer .button-row {
+      justify-content: center;
+    }
+
+    #tourGuideContainer button {
+      padding: 12px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      max-width: 200px;
+    }
+  </style>
+
+  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+
+<body>
+  <h2>Wähle eine Location</h2>
+  <select id="locationSelect">
+    <option value="">-- Bitte auswählen --</option>
+  </select>
+
+  <div id="results"></div>
+
+  <div id="tourGuideContainer">
+    <div class="button-row">
+      <button onclick="window.open('https://drive.fkfev.de/s/4jw2ftgeFT9ZMNx')">Tour Guide</button>
+      <button onclick="window.location.href='impressum.html'">Impressum &amp; Credits</button>
+    </div>
+  </div>
+
+  <script>
+    async function loadCSV(url) {
+      const response = await fetch(url);
+      const text = await response.text();
+      const rows = text.trim().split('\n');
+      const headers = rows[0].split(',');
+      const data = [];
+
+      for (let i = 1; i < rows.length; i++) {
+        const values = rows[i].split(',');
+        const row = {};
+        headers.forEach((h, index) => {
+          row[h.trim()] = values[index] ? values[index].trim() : '';
+        });
+        data.push(row);
+      }
+
+      return data;
+    }
+
+    function createButton(label, url) {
+      if (!url) return null;
+      const btn = document.createElement('button');
+      btn.textContent = label;
+      btn.onclick = () => window.open(url, '_blank');
+      return btn;
+    }
+
+    function addButtonRow(container, buttons) {
+      const row = document.createElement('div');
+      row.className = 'button-row';
+      buttons.forEach(btn => {
+        if (btn) row.appendChild(btn);
+      });
+      container.appendChild(row);
+    }
+
+    const locationSelect = document.getElementById('locationSelect');
+    const resultsDiv = document.getElementById('results');
+
+    loadCSV('data.csv').then(data => {
+      const locations = [...new Set(data.map(entry => entry.location))];
+      locations.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        locationSelect.appendChild(option);
+      });
+
+      locationSelect.addEventListener('change', () => {
+        const selectedLocation = locationSelect.value;
+        resultsDiv.innerHTML = '';
+
+        const filtered = data.filter(entry => entry.location === selectedLocation);
+        filtered.forEach(entry => {
+          const container = document.createElement('div');
+          container.className = 'entry';
+
+          const title = document.createElement('h3');
+          title.textContent = entry.name;
+          container.appendChild(title);
+
+          const btn1 = createButton('Webseite', entry.url);
+          const btn2 = createButton('Park Map', entry.mpurl);
+          const btn3 = createButton('Coaster Count', entry.ccurl);
+          const btn4 = createButton('RCDB', entry.rcdburl);
+          const btn5 = createButton('Wettervorhersage', entry.w3url);
+          const btn6 = createButton('Niederschlagsradar', entry.weurl);
+          const btn7 = createButton('Heutiges Hotel', entry.hourl);
+
+          addButtonRow(container, [btn1, btn2]); // Zeile 1
+          addButtonRow(container, [btn3, btn4]); // Zeile 2
+          addButtonRow(container, [btn5, btn6]); // Zeile 3
+          if (btn7) container.appendChild(btn7); // Zeile 4
+
+          resultsDiv.appendChild(container);
+        });
+      });
+    }).catch(err => {
+      resultsDiv.innerHTML = '<p style="color:red;">Fehler beim Laden der CSV-Daten.</p>';
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
